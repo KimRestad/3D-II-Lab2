@@ -1,0 +1,5 @@
+newmtl lambert2SG
+illum 4
+Tf 1.00 1.00 1.00
+map_Kd bthcolor.dds
+Ni 1.00

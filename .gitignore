@@ -1,0 +1,17 @@
+# Ignore compiled files
+Dist/
+Build/
+
+# Ignore Visual Studio session files
+ipch/
+*.opensdf
+*.sdf
+*.suo
+
+# Ignore lock and backup files
+*.autosave
+*.dia~
+*.ods#
+~*
+.~*
+
