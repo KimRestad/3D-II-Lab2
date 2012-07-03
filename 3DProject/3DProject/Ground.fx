@@ -17,10 +17,23 @@ RasterizerState NoCulling
 	//FillMode = Wireframe;
 };
 
+DepthStencilState EnableDepth
+{
+	DepthEnable = TRUE;
+	DepthWriteMask = ALL;
+	DepthFunc = LESS_EQUAL;
+};
+
 SamplerState linearSampler {
 	Filter = MIN_MAG_MIP_LINEAR;
 	AddressU = Wrap;
 	AddressV = Wrap;
+};
+
+SamplerState pointSampler {
+	Filter = MIN_MAG_MIP_POINT;
+	AddressU = Clamp;
+	AddressV = Clamp;
 };
 
 cbuffer cbEveryFrame
@@ -51,12 +64,18 @@ float4 PS(PS_INPUT input) : SV_Target0
 	// Calculate shadows
 	float4 posLightWVP = mul(float4(input.positionW, 1.0f), gLightWVP);
 	posLightWVP = posLightWVP / posLightWVP.w;
-	float shadowDepth = gShadowMapTex.Sample(linearSampler, posLightWVP.xy);
+
+	posLightWVP.x = posLightWVP.x * 0.5f + 0.5f;
+	posLightWVP.y = posLightWVP.y * -0.5f + 0.5f;
+
+	float shadowDepth = gShadowMapTex.Sample(pointSampler, posLightWVP.xy);
+
+	float shadowFactor = 1.0f;
 
 	if (posLightWVP.z > shadowDepth)
-		return (1.0, 0.0, 0.0, 1.0);
+		shadowFactor = shadowDepth;
 
-	return texColor;
+	return texColor * shadowFactor;
 }
 
 technique10 DrawTechnique
@@ -68,6 +87,7 @@ technique10 DrawTechnique
 		SetPixelShader(CompileShader(ps_4_0, PS()));
 
 		SetRasterizerState(NoCulling);
+		SetDepthStencilState(EnableDepth, 0xff);
 	}
 }
 

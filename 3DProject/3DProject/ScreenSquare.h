@@ -12,6 +12,7 @@ public:
 
 	void Initialize(ID3D10Device* device, ID3D10ShaderResourceView* drawTexture, D3DXVECTOR2 position, float width, float height);
 	void Draw();
+	void SetTexture(ID3D10ShaderResourceView* drawTexture);
 
 private:
 	struct SSVertex
@@ -27,7 +28,7 @@ private:
 	ID3D10InputLayout*			mVertexLayout;
 	ID3D10ShaderResourceView*	mDrawTexture;
 
-	D3DXMATRIX				mViewportMatrix;
+	D3DXMATRIX					mViewportMatrix;
 
 	void CreateBuffer(D3DXVECTOR2 position, float width, float height);
 	void CreateEffect();

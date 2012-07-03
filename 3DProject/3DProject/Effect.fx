@@ -19,6 +19,13 @@ RasterizerState NoCulling
 	//FillMode = Wireframe;
 };
 
+DepthStencilState EnableDepth
+{
+	DepthEnable = TRUE;
+	DepthWriteMask = ALL;
+	DepthFunc = LESS_EQUAL;
+};
+
 SamplerState linearSampler {
 	Filter = MIN_MAG_MIP_LINEAR;
 	AddressU = Wrap;
@@ -37,12 +44,8 @@ float3 gKd;
 float3 gKa;
 float3 gKs;
 float gSExp;
-//float3 Tf = float3(1.0, 1.0, 1.0);
-//int illum = 1;
-//float refrac = 1.0f;
 
 Texture2D gTextureBTH;
-//Texture2D gShadowMapTex;
 bool gDrawLight = true;
 
 // ************************************************************************
@@ -124,6 +127,7 @@ technique10 DrawTechnique
 		SetPixelShader(CompileShader(ps_4_0, PS()));
 
 		SetRasterizerState(NoCulling);
+		SetDepthStencilState(EnableDepth, 0xff);
 	}
 }
 

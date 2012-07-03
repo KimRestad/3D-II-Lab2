@@ -3,6 +3,7 @@
 
 #include <D3DX10.h>
 #include "Buffer.h"
+#include "DepthTexture.h"
 
 struct FloorVertex
 {
@@ -15,9 +16,10 @@ class Floor
 public:
 	Floor();
 	~Floor();
-	void Initialize(ID3D10Device* device, ID3D10ShaderResourceView* depthTexture, D3DXVECTOR3 position, int width, int depth);
+	void Initialize(ID3D10Device* device, DepthTexture* depthTexture, D3DXVECTOR3 position, int width, int depth);
 	void Update();
 	void Draw(D3DXMATRIX* vpMatrix, D3DXMATRIX* lightWVP);
+	void SetDepthTexture(DepthTexture* newDepthTexture);
 
 private:
 	ID3D10Device*							mDevice;
@@ -27,7 +29,7 @@ private:
 	ID3D10InputLayout*						mVertexLayout;
 	D3DXVECTOR3								mPosition;
 
-	ID3D10ShaderResourceView*				mDepthTexture;
+	DepthTexture*							mDepthTexture;
 	ID3D10EffectShaderResourceVariable*		mfxDepthTextureVar;
 
 	static const int			C_NUM_VERTICES;

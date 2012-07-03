@@ -45,9 +45,6 @@
     <ClCompile Include="Floor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DrawableTexture2D.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ScreenSquare.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -80,10 +77,10 @@
     <ClInclude Include="Floor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DrawableTexture2D.h">
+    <ClInclude Include="ScreenSquare.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ScreenSquare.h">
+    <ClInclude Include="DepthTexture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

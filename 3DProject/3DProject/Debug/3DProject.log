@@ -1,1 +1,4 @@
-﻿
+﻿c:\users\kimsie\documents\visual studio 2010\projects\3d ii - lab 2\3dproject\3dproject\game.cpp(30): warning C4244: '=' : conversion from 'const float' to 'UINT', possible loss of data
+c:\users\kimsie\documents\visual studio 2010\projects\3d ii - lab 2\3dproject\3dproject\game.cpp(31): warning C4244: '=' : conversion from 'const float' to 'UINT', possible loss of data
+c:\users\kimsie\documents\visual studio 2010\projects\3d ii - lab 2\3dproject\3dproject\game.cpp(201): warning C4244: '=' : conversion from 'const float' to 'UINT', possible loss of data
+c:\users\kimsie\documents\visual studio 2010\projects\3d ii - lab 2\3dproject\3dproject\game.cpp(202): warning C4244: '=' : conversion from 'const float' to 'UINT', possible loss of data

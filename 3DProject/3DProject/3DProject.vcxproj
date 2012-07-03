@@ -80,7 +80,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="DrawableTexture2D.cpp" />
     <ClCompile Include="Floor.cpp" />
     <ClCompile Include="Object3D.cpp" />
     <ClCompile Include="Buffer.cpp" />
@@ -93,7 +92,7 @@
     <ClCompile Include="ScreenSquare.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DrawableTexture2D.h" />
+    <ClInclude Include="DepthTexture.h" />
     <ClInclude Include="Floor.h" />
     <ClInclude Include="Object3D.h" />
     <ClInclude Include="Buffer.h" />

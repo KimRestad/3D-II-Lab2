@@ -18,7 +18,7 @@ Floor::~Floor()
 	mVertexBuffer = NULL;
 }
 
-void Floor::Initialize(ID3D10Device* device, ID3D10ShaderResourceView* depthTexture, D3DXVECTOR3 position, int width, int depth)
+void Floor::Initialize(ID3D10Device* device, DepthTexture* depthTexture, D3DXVECTOR3 position, int width, int depth)
 {
 	mDevice = device;
 	mPosition = position;
@@ -175,7 +175,7 @@ void Floor::Update()
 
 void Floor::Draw(D3DXMATRIX* vpMatrix, D3DXMATRIX* lightWVP)
 {
-	mfxDepthTextureVar->SetResource(mDepthTexture);
+	mfxDepthTextureVar->SetResource(mDepthTexture->SRV);
 	mVertexBuffer->MakeActive();
 
 	mEffect->GetVariableByName("gWVP")->AsMatrix()->SetMatrix((float*)vpMatrix);
@@ -193,4 +193,9 @@ void Floor::Draw(D3DXMATRIX* vpMatrix, D3DXMATRIX* lightWVP)
 	}
 
 	mfxDepthTextureVar->SetResource(NULL);
+}
+
+void Floor::SetDepthTexture(DepthTexture* newDepthTexture)
+{
+	mDepthTexture = newDepthTexture;
 }

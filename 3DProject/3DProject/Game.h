@@ -3,7 +3,7 @@
 
 #include "Camera.h"
 #include "D3DApplication.h"
-#include "DrawableTexture2D.h"
+#include "DepthTexture.h"
 #include "GameTime.h"
 #include "GameFont.h"
 #include "Object3D.h"
@@ -21,29 +21,28 @@ public:
 	virtual void Draw();
 
 private:
-	// Shadow mapping variables
-	static const int			C_HALF_WIDTH = 256;
+	static const int				C_FLOOR_WIDTH = 512;
 
-	//DrawableTexture2D			mShadowMap;
-	D3DXVECTOR3					mLightPos;
-	D3DXMATRIX					mLightViewMatrix;
-	D3DXMATRIX					mLightProjMatrix;
-	Camera*						mLightCam;
-	ScreenSquare				mScreenSquare;
-	ID3D10DepthStencilView*		mDepthMapDSV;
-	ID3D10ShaderResourceView*	mDepthMapSRV;
-	D3D10_VIEWPORT				mViewport;
+	// Shadow mapping variables
+	D3DXVECTOR3						mLightPos;
+	D3DXMATRIX						mLightViewMatrix;
+	D3DXMATRIX						mLightProjMatrix;
+	Camera*							mLightCam;
+	ScreenSquare					mScreenSquare;
+	D3D10_VIEWPORT					mViewport;
+	std::vector<DepthTexture*>		mDepthMap;
+	int								mDepthMapIndex;
 
 	// Game variables
-	GameTime					mGameTime;
-	GameFont*					mDefaultFont;
-	Object3D*					mObject;
-	Floor						mFloor;
-	Camera*						mCamera;
+	GameTime						mGameTime;
+	GameFont*						mDefaultFont;
+	Object3D*						mObject;
+	Floor							mFloor;
+	Camera*							mCamera;
 
-	std::string					mFPSString;
-	int							mNoFrames;
-	float						mLastFrameTime;
+	std::string						mFPSString;
+	int								mNoFrames;
+	float							mLastFrameTime;
 
 	void CreateRenderTexture(UINT width, UINT height);
 	void DrawToTexture();
@@ -51,9 +50,10 @@ private:
 	D3DXVECTOR2 TransformToViewport(const D3DXVECTOR2& vector);
 	//void CreateShadowMapVertices();
 	void SetupShadowMapDrawing();
-	void WrapUpShadowMapDrawing();
 	void ResetTargetAndViewport();
 	void CreateLightMatrices();
+	DepthTexture* CreateDepthTexture(int width, int height);
+	void ChangeDepthMap(int newIndex);
 
 protected:
 	virtual void ProgramLoop();

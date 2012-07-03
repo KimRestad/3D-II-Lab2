@@ -202,6 +202,11 @@ void ScreenSquare::Draw()
 	ClearTexture();
 }
 
+void ScreenSquare::SetTexture(ID3D10ShaderResourceView* drawTexture)
+{
+	mDrawTexture = drawTexture;
+}
+
 void ScreenSquare::SetTexture()
 {
 	mEffect->GetVariableByName("textureBG")->AsShaderResource()->SetResource(mDrawTexture);
