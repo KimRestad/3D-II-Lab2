@@ -40,11 +40,36 @@ cbuffer cbEveryFrame
 {
 	matrix gWVP;
 	matrix gLightWVP;
+	bool gPCF;
 };
 
 Texture2D gTextureGround;
 Texture2D gShadowMapTex;
 
+// ************************************************************************
+// ** HELPER FUNCTIONS
+// ************************************************************************
+
+float CalcShadowFactor(float2 uv, float depth)
+{
+	float shadowDepth = gShadowMapTex.Sample(pointSampler, uv);
+
+	float shadowFactor = 1.0f;
+
+	if (depth > shadowDepth)
+		shadowFactor = shadowDepth;
+
+	return shadowFactor;
+}
+
+float CalcShadowFactorPCF(float2 uv, float depth)
+{
+	return 3.0f;
+}
+
+// ************************************************************************
+// ** SHADER FUNCTIONS
+// ************************************************************************
 PS_INPUT VS(VS_INPUT input)
 {
 	PS_INPUT output;
@@ -68,16 +93,15 @@ float4 PS(PS_INPUT input) : SV_Target0
 	posLightWVP.x = posLightWVP.x * 0.5f + 0.5f;
 	posLightWVP.y = posLightWVP.y * -0.5f + 0.5f;
 
-	float shadowDepth = gShadowMapTex.Sample(pointSampler, posLightWVP.xy);
-
-	float shadowFactor = 1.0f;
-
-	if (posLightWVP.z > shadowDepth)
-		shadowFactor = shadowDepth;
-
-	return texColor * shadowFactor;
+	if(gPCF)
+		return texColor * CalcShadowFactorPCF(posLightWVP.xy, posLightWVP.z);
+	else
+		return texColor * CalcShadowFactor(posLightWVP.xy, posLightWVP.z);
 }
 
+// ************************************************************************
+// ** TECHNIQUES
+// ************************************************************************
 technique10 DrawTechnique
 {
 	pass P0

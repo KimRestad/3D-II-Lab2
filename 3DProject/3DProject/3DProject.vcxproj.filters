@@ -48,6 +48,9 @@
     <ClCompile Include="ScreenSquare.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameTime.h">
@@ -83,6 +86,9 @@
     <ClInclude Include="DepthTexture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Effect.fx">
@@ -91,10 +97,10 @@
     <None Include="Ground.fx">
       <Filter>Effect Files</Filter>
     </None>
-    <None Include="ShadowMapBuild.fx">
+    <None Include="ScreenSquare.fx">
       <Filter>Effect Files</Filter>
     </None>
-    <None Include="ScreenSquare.fx">
+    <None Include="EffectShadows.fx">
       <Filter>Effect Files</Filter>
     </None>
   </ItemGroup>

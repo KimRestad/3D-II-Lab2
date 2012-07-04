@@ -23,6 +23,9 @@ SamplerState linearSampler {
 
 Texture2D textureBG;
 
+// ************************************************************************
+// ** SHADER FUNCTIONS
+// ************************************************************************
 PS_INPUT VS(VS_INPUT input)
 {
 	PS_INPUT output;
@@ -50,6 +53,9 @@ float4 PS(PS_INPUT input) : SV_TARGET0
 	return float4(depth, depth, depth, 1.0f);
 }
 
+// ************************************************************************
+// ** TECHNIQUES
+// ************************************************************************
 technique10 DrawTechnique
 {
 	pass P0

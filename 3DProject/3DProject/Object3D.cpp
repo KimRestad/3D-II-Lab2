@@ -73,21 +73,23 @@ void Object3D::Group::Draw(ID3D10Device* device)
 }
 
 Object3D::Object3D(ID3D10Device* device, std::string filename, D3DXVECTOR3 position, D3DXVECTOR3 lightPos)
-	: mDevice(device), mEffect(NULL), mTechnique(NULL), mVertexLayout(NULL), mFont(NULL), 
-	  mPosition(position), mRotation(0.0f), mVelocity(D3DXVECTOR3(1.2, 0.5, 0.8)), mLightPosition(lightPos),
-	  mFXEyePos(NULL), mFXLightPos(NULL), mFXWorld(NULL), mFXWorldViewProj(NULL)
+	: mDevice(device), mEffect(NULL), mEffectShadows(NULL), mTechnique(NULL), mTechniqueShadows(NULL),
+	  mVertexLayout(NULL), mFont(NULL), mPosition(position), mRotation(0.0f), mLightPosition(lightPos),
+	  mVelocity(D3DXVECTOR3(1.2, 0.5, 0.8)), mFXEyePos(NULL), mFXLightPos(NULL), mFXWorld(NULL), 
+	  mFXWorldViewProj(NULL), mFXShadowWVP(NULL)
 {
 	if(!Load(filename))
 		return;
 
-	CreateEffect();
+	mEffect = CreateEffect("Effect.fx");
+	mEffectShadows = CreateEffect("EffectShadows.fx");
 	CreateVertexLayout();
 
 	mMatrixWorld = new D3DXMATRIX();
 	D3DXMatrixIdentity(mMatrixWorld);
 
 	D3DXVec3Normalize(&mVelocity, &mVelocity);
-	mVelocity *= 50;
+	mVelocity *= 30;
 
 	UpdateWorldMatrix();
 
@@ -95,6 +97,7 @@ Object3D::Object3D(ID3D10Device* device, std::string filename, D3DXVECTOR3 posit
 	mFXLightPos = mEffect->GetVariableByName("gLightPosition")->AsVector();
 	mFXWorld = mEffect->GetVariableByName("gWorld")->AsMatrix();
 	mFXWorldViewProj = mEffect->GetVariableByName("gWVP")->AsMatrix();
+	mFXShadowWVP = mEffectShadows->GetVariableByName("gWVP")->AsMatrix();
 	
 	for(std::map<std::string, Group>::iterator it = mGroups.begin(); it != mGroups.end(); ++it)
 		it->second.Finalize(mDevice, mEffect);
@@ -105,6 +108,7 @@ Object3D::Object3D(ID3D10Device* device, std::string filename, D3DXVECTOR3 posit
 Object3D::~Object3D()
 {
 	SafeRelease(mEffect);
+	SafeRelease(mEffectShadows);
 	SafeRelease(mVertexLayout);
 
 	SafeDelete(mFont);
@@ -334,15 +338,16 @@ bool Object3D::LoadMaterials(std::string filename)
 }
 
 // Compile and create the shader/effect
-HRESULT Object3D::CreateEffect()
+ID3D10Effect* Object3D::CreateEffect(std::string filename)
 {
+	ID3D10Effect* returnEffect = NULL;
 	HRESULT result = S_OK;								// Variable that stores the result of the functions
 	UINT shaderFlags = D3D10_SHADER_ENABLE_STRICTNESS;	// Shader flags
 	ID3D10Blob* errors = NULL;							// Variable to store error messages from functions
 	ID3D10Blob* effect = NULL;							// Variable to store compiled (but not created) effect
 	
 	// Compile shader, if failed - show error message and return
-	result = D3DX10CompileFromFileA("Effect.fx",	// Path and name of the effect file to compile
+	result = D3DX10CompileFromFileA(filename.c_str(),	// Path and name of the effect file to compile
 								   0,				// Shader macros: none needed
 								   0,				// Include interface: not needed - no #include in shader
 								   "",				// Shader start function, not used when compiling from file
@@ -362,13 +367,13 @@ HRESULT Object3D::CreateEffect()
 			SafeRelease(errors);
 		}
 
-		return result;
+		return NULL;
 	}
 
 	result = D3DX10CreateEffectFromMemory(
 						effect->GetBufferPointer(),	// Pointer to the effect in memory, gotten from the compiled effect
 						effect->GetBufferSize(),	// The effect's size in memory, gotten from the compiled effect
-						"Effect.fx",				// Name of the effect file
+						filename.c_str(),			// Name of the effect file
 						NULL,						// Shader macros: none needed
 						NULL,						// Include interface: not needed 
 						"fx_4_0",					// String specifying shader model (or shader profile)
@@ -377,17 +382,17 @@ HRESULT Object3D::CreateEffect()
 						mDevice,					// Pointer to the direct3D device that will use resources
 						NULL,						// Pointer to effect pool for variable sharing between effects
 						NULL,						// Thread pump interface: not needed - return only when finished
-						&mEffect,					// Out: where to put the created effect (pointer)
+						&returnEffect,				// Out: where to put the created effect (pointer)
 						&errors,					// Out: Where to put the errors, if there are any (pointer)
 						NULL);						// Out: Result not needed, result is gotten from the return value
 
 	if(FAILED(result))								// If failed, show error message and return
 	{
 		MessageBox(0, "Shader creation failed!", "OBJECT3D ERROR", 0);
-		return result;
+		return NULL;
 	}
 
-	return result;
+	return returnEffect;
 }
 
 // Build vertex layout
@@ -431,6 +436,25 @@ HRESULT Object3D::CreateVertexLayout()
 		// Bind the input layout to the 3D device
 		mDevice->IASetInputLayout(mVertexLayout);
 
+		// --- Repeat for the shadow technique
+		// Get the effect technique from the effect, and save the descritption of the first pass
+		mTechniqueShadows = mEffectShadows->GetTechniqueByName("DrawTechnique");
+		mTechniqueShadows->GetPassByIndex(0)->GetDesc(&passDesc);
+
+		// Create the input layout and save it, if failed - show an error message
+		result = mDevice->CreateInputLayout(
+					vertexDesc,						// Description of input structure - array of element descriptions
+					3,								// Number of elements in the input structure description
+					passDesc.pIAInputSignature,		// Get pointer to the compiled shader
+					passDesc.IAInputSignatureSize,	// The size of the compiled shader
+					&mVertexLayout);				// Out: where to put the created input layout 
+
+		if(FAILED(result))							// If layer creation fails, show an error message and return
+		{
+			MessageBox(0, "Input Layout creation failed!", "OBJECT3D ERROR", 0);
+			return result;
+		}
+
 		return result;
 }
 
@@ -439,16 +463,26 @@ void Object3D::Update(GameTime gameTime)
 	mRotation += gameTime.GetTimeSinceLastTick().Seconds;
 	mPosition += mVelocity * gameTime.GetTimeSinceLastTick().Seconds;
 
-	if(mPosition.x < -256 || mPosition.x > 256)
+	/*if(mPosition.x < -256 || mPosition.x > 256)
 		mVelocity.x = -mVelocity.x;
-	/*if(mPosition.y < 0 || mPosition.y > 50)
-		mVelocity.y = -mVelocity.y;*/
+	if(mPosition.y < 0 || mPosition.y > 50)
+		mVelocity.y = -mVelocity.y;
+	if(mPosition.z < -256 || mPosition.z > 256)
+		mVelocity.z = -mVelocity.z;*/
+
+
+	if(mPosition.x < -256)
+		mVelocity.x = abs(mVelocity.x);
+	if(mPosition.x > 256)
+		mVelocity.x = -abs(mVelocity.x);
 	if(mPosition.y < 0)
 		mVelocity.y = abs(mVelocity.y);
-	if(mPosition.y > 50)
+	if(mPosition.y > 30)
 		mVelocity.y = -abs(mVelocity.y);
-	if(mPosition.z < -256 || mPosition.z > 256)
-		mVelocity.z = -mVelocity.z;
+	if(mPosition.z < -256)
+		mVelocity.z = abs(mVelocity.z);
+	if(mPosition.z > 256)
+		mVelocity.z = -abs(mVelocity.z);
 
 	UpdateWorldMatrix();
 
@@ -475,6 +509,25 @@ void Object3D::Draw(D3DXMATRIX* vpMatrix, D3DXVECTOR3 eyePos)
 	for(UINT p = 0; p < techDesc.Passes; ++p)
 	{
 		mTechnique->GetPassByIndex(p)->Apply(0);
+		
+		for(std::map<std::string, Group>::iterator it = mGroups.begin(); it != mGroups.end(); ++it)
+			it->second.Draw(mDevice);
+	}
+}
+
+void Object3D::DrawShadows(D3DXMATRIX* vpMatrix, D3DXVECTOR3 eyePos)
+{
+	mDevice->IASetInputLayout(mVertexLayout);
+	mDevice->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	D3DXMATRIX wvp = (*mMatrixWorld) * (*vpMatrix);
+	mFXShadowWVP->SetMatrix((float*)wvp);
+
+	D3D10_TECHNIQUE_DESC techDesc;
+	mTechniqueShadows->GetDesc(&techDesc);
+	for(UINT p = 0; p < techDesc.Passes; ++p)
+	{
+		mTechniqueShadows->GetPassByIndex(p)->Apply(0);
 		
 		for(std::map<std::string, Group>::iterator it = mGroups.begin(); it != mGroups.end(); ++it)
 			it->second.Draw(mDevice);

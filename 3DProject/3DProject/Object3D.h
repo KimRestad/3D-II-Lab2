@@ -20,6 +20,7 @@ public:
 	
 	void Update(GameTime gameTime);
 	void Draw(D3DXMATRIX* vpMatrix, D3DXVECTOR3 eyePos);
+	void DrawShadows(D3DXMATRIX* vpMatrix, D3DXVECTOR3 eyePos);
 
 private:
 	struct Vertex
@@ -73,7 +74,9 @@ private:
 
 	ID3D10Device*				mDevice;
 	ID3D10Effect*				mEffect;
+	ID3D10Effect*				mEffectShadows;
 	ID3D10EffectTechnique*		mTechnique;
+	ID3D10EffectTechnique*		mTechniqueShadows;
 
 	ID3D10InputLayout*			mVertexLayout;
 	GameFont*					mFont;
@@ -88,11 +91,12 @@ private:
 	ID3D10EffectMatrixVariable* mFXWorldViewProj;
 	ID3D10EffectVectorVariable* mFXLightPos;
 	ID3D10EffectVectorVariable* mFXEyePos;
+	ID3D10EffectMatrixVariable* mFXShadowWVP;
 
 	bool Load(std::string filename);
 	bool LoadMaterials(std::string filename);
 
-	HRESULT CreateEffect();
+	ID3D10Effect* CreateEffect(std::string filename);
 	HRESULT CreateVertexLayout();
 	void UpdateWorldMatrix();
 };

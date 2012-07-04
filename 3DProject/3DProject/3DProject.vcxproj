@@ -89,6 +89,7 @@
     <ClCompile Include="GameFont.cpp" />
     <ClCompile Include="GameTime.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Scene.cpp" />
     <ClCompile Include="ScreenSquare.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -102,13 +103,14 @@
     <ClInclude Include="GameFont.h" />
     <ClInclude Include="GameTime.h" />
     <ClInclude Include="Globals.h" />
+    <ClInclude Include="Scene.h" />
     <ClInclude Include="ScreenSquare.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Effect.fx" />
+    <None Include="EffectShadows.fx" />
     <None Include="Ground.fx" />
     <None Include="ScreenSquare.fx" />
-    <None Include="ShadowMapBuild.fx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

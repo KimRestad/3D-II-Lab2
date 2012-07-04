@@ -4,7 +4,7 @@ const int Floor::C_NUM_VERTICES		= 4;
 const char* Floor::C_FILENAME		= "Ground.fx";
 
 Floor::Floor()
-	: mDevice(0), mVertexBuffer(0), mEffect(0), mTechnique(0), mVertexLayout(0)
+	: mDevice(0), mVertexBuffer(0), mEffect(0), mTechnique(0), mVertexLayout(0), mPCF(false)
 {
 }
 
@@ -65,6 +65,9 @@ void Floor::Initialize(ID3D10Device* device, DepthTexture* depthTexture, D3DXVEC
 	mEffect->GetVariableByName("gTextureGround")->AsShaderResource()->SetResource(pSRView);
 
 	mfxDepthTextureVar = mEffect->GetVariableByName("gShadowMapTex")->AsShaderResource();
+	mfxWVP = mEffect->GetVariableByName("gWVP")->AsMatrix();
+	mfxLightWVP = mEffect->GetVariableByName("gLightWVP")->AsMatrix();
+	mfxPCF = mEffect->GetVariableByName("gPCF")->AsScalar();
 }
 
 // Compile and create the shader/effect
@@ -178,8 +181,9 @@ void Floor::Draw(D3DXMATRIX* vpMatrix, D3DXMATRIX* lightWVP)
 	mfxDepthTextureVar->SetResource(mDepthTexture->SRV);
 	mVertexBuffer->MakeActive();
 
-	mEffect->GetVariableByName("gWVP")->AsMatrix()->SetMatrix((float*)vpMatrix);
-	mEffect->GetVariableByName("gLightWVP")->AsMatrix()->SetMatrix((float*)lightWVP);
+	mfxWVP->SetMatrix((float*)vpMatrix);
+	mfxLightWVP->SetMatrix((float*)lightWVP);
+	mfxPCF->SetBool(mPCF);
 
 	mDevice->IASetInputLayout(mVertexLayout);
 	mDevice->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
@@ -198,4 +202,14 @@ void Floor::Draw(D3DXMATRIX* vpMatrix, D3DXMATRIX* lightWVP)
 void Floor::SetDepthTexture(DepthTexture* newDepthTexture)
 {
 	mDepthTexture = newDepthTexture;
+}
+
+void Floor::SetPCF(bool newPCF)
+{
+	mPCF = newPCF;
+}
+
+const bool& Floor::GetPCF() const
+{
+	return mPCF;
 }
