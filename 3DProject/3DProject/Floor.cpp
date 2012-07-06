@@ -68,6 +68,8 @@ void Floor::Initialize(ID3D10Device* device, DepthTexture* depthTexture, D3DXVEC
 	mfxWVP = mEffect->GetVariableByName("gWVP")->AsMatrix();
 	mfxLightWVP = mEffect->GetVariableByName("gLightWVP")->AsMatrix();
 	mfxPCF = mEffect->GetVariableByName("gPCF")->AsScalar();
+	mfxSMWidth = mEffect->GetVariableByName("gSMWidth")->AsScalar();
+	mfxSMWidthInv = mEffect->GetVariableByName("gSMWidthInv")->AsScalar();
 }
 
 // Compile and create the shader/effect
@@ -184,6 +186,8 @@ void Floor::Draw(D3DXMATRIX* vpMatrix, D3DXMATRIX* lightWVP)
 	mfxWVP->SetMatrix((float*)vpMatrix);
 	mfxLightWVP->SetMatrix((float*)lightWVP);
 	mfxPCF->SetBool(mPCF);
+	mfxSMWidth->SetFloat(mDepthTexture->C_WIDTH);
+	mfxSMWidthInv->SetFloat(mDepthTexture->C_WIDTH_INV);
 
 	mDevice->IASetInputLayout(mVertexLayout);
 	mDevice->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);

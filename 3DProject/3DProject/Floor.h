@@ -37,6 +37,8 @@ private:
 	ID3D10EffectMatrixVariable*				mfxWVP;
 	ID3D10EffectMatrixVariable*				mfxLightWVP;
 	ID3D10EffectScalarVariable*				mfxPCF;
+	ID3D10EffectScalarVariable*				mfxSMWidth;
+	ID3D10EffectScalarVariable*				mfxSMWidthInv;
 
 	static const int			C_NUM_VERTICES;
 	static const char*			C_FILENAME;

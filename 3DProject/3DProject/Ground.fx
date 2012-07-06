@@ -41,8 +41,11 @@ cbuffer cbEveryFrame
 	matrix gWVP;
 	matrix gLightWVP;
 	bool gPCF;
+	float gSMWidth;
+	float gSMWidthInv;
 };
 
+float gSMEpsilon = 0.001f;
 Texture2D gTextureGround;
 Texture2D gShadowMapTex;
 
@@ -52,7 +55,7 @@ Texture2D gShadowMapTex;
 
 float CalcShadowFactor(float2 uv, float depth)
 {
-	float shadowDepth = gShadowMapTex.Sample(pointSampler, uv);
+	float shadowDepth = gShadowMapTex.Sample(pointSampler, uv).r;
 
 	float shadowFactor = 1.0f;
 
@@ -64,7 +67,28 @@ float CalcShadowFactor(float2 uv, float depth)
 
 float CalcShadowFactorPCF(float2 uv, float depth)
 {
-	return 3.0f;
+	//if(uv.x < -1.0f || uv.x > 1.0f)
+		//return 0.0f;
+	//if(uv.y < -1.0f || uv.y > 1.0f)
+		//return 0.0f;
+	//if(depth < 0.0f)
+		//return 0.0f;
+
+	float sample0 = gShadowMapTex.Sample(pointSampler, uv).r;
+	float sample1 = gShadowMapTex.Sample(pointSampler, uv + float2(gSMWidthInv, 0.0f)).r;
+	float sample2 = gShadowMapTex.Sample(pointSampler, uv + float2(0.0f, gSMWidthInv)).r;
+	float sample3 = gShadowMapTex.Sample(pointSampler, uv + float2(gSMWidthInv, gSMWidthInv)).r;
+
+	float depth0 = depth <= sample0 + gSMEpsilon;
+	float depth1 = depth <= sample1 + gSMEpsilon;
+	float depth2 = depth <= sample2 + gSMEpsilon;
+	float depth3 = depth <= sample3 + gSMEpsilon;
+
+	float2 texPos = uv * gSMWidth;
+
+	float2 t = frac(texPos);
+
+	return lerp(lerp(depth0, depth1, t.x), lerp(depth2, depth3, t.x), t.y);
 }
 
 // ************************************************************************
@@ -76,7 +100,6 @@ PS_INPUT VS(VS_INPUT input)
 
 	output.position = mul(float4(input.position, 1.0f), gWVP);
 	output.positionW = input.position;
-	//output.position = float4(input.position, 1.0);
 	output.uv = input.uv;
 
 	return output;
@@ -88,7 +111,7 @@ float4 PS(PS_INPUT input) : SV_Target0
 
 	// Calculate shadows
 	float4 posLightWVP = mul(float4(input.positionW, 1.0f), gLightWVP);
-	posLightWVP = posLightWVP / posLightWVP.w;
+	posLightWVP /= posLightWVP.w;
 
 	posLightWVP.x = posLightWVP.x * 0.5f + 0.5f;
 	posLightWVP.y = posLightWVP.y * -0.5f + 0.5f;
